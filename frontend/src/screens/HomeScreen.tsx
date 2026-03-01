@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, FlatList, StyleSheet, ActivityIndicator,
-  TextInput, TouchableOpacity, SafeAreaView, ScrollView,
+  TextInput, TouchableOpacity, SafeAreaView, ScrollView, ImageBackground
 } from 'react-native';
 import { theme } from '../theme';
 import { WineCard } from '../components/WineCard';
 import { winesApi } from '../api/wines';
 import { Wine } from '../types';
+import { articles } from '../data/articles';
 
 const WINE_TYPES = [
   { label: 'Все', value: '' },
@@ -60,8 +61,8 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     ? `Результаты (${searchResults.length})`
     : 'Популярное 🔥';
 
-  return (
-    <SafeAreaView style={styles.container}>
+  const renderHeader = () => (
+    <>
       <View style={styles.searchRow}>
         <TextInput
           style={styles.searchInput}
@@ -93,14 +94,56 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </ScrollView>
       </View>
 
-      <Text style={styles.sectionTitle}>{title}</Text>
+      {!isFiltering && (
+        <View style={styles.articlesSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Про вино</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Journal')}>
+              <Text style={styles.sectionLink}>›</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.articlesScroll}>
+            {articles.map(article => (
+              <TouchableOpacity
+                key={article.id}
+                style={styles.articleCard}
+                activeOpacity={0.9}
+                onPress={() => navigation.navigate('ArticleDetail', { article })}
+              >
+                <ImageBackground 
+                  source={{ uri: article.imageUrl }} 
+                  style={styles.articleImage}
+                  imageStyle={{ borderRadius: 16 }}
+                >
+                  <View style={styles.articleOverlay}>
+                    <Text style={styles.articleTitle} numberOfLines={2}>{article.title}</Text>
+                    <Text style={styles.articleSubtitle} numberOfLines={1}>{article.author} • {article.date}</Text>
+                  </View>
+                </ImageBackground>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
+      <Text style={[styles.sectionTitle, { marginLeft: theme.spacing.md, marginVertical: theme.spacing.md }]}>
+        {title}
+      </Text>
+    </>
+  );
+
+  return (
+    <SafeAreaView style={styles.container}>
       {loading || searching ? (
-        <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 40 }} />
+        <View>
+          {renderHeader()}
+          <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 40 }} />
+        </View>
       ) : (
         <FlatList
           data={displayWines}
           keyExtractor={item => item.id}
+          ListHeaderComponent={renderHeader}
           renderItem={({ item }) => (
             <WineCard wine={item} onPress={() => navigation.navigate('WineDetail', { wineId: item.id })} />
           )}
@@ -137,9 +180,61 @@ const styles = StyleSheet.create({
   filterChipActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
   filterChipText: { fontSize: theme.fontSize.sm, color: theme.colors.text },
   filterChipTextActive: { color: theme.colors.white, fontWeight: theme.fontWeight.semibold },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: theme.spacing.md,
+    marginBottom: 12,
+  },
   sectionTitle: {
-    fontSize: theme.fontSize.xl, fontWeight: theme.fontWeight.bold,
-    color: theme.colors.text, marginLeft: theme.spacing.md, marginVertical: theme.spacing.md,
+    fontSize: 20, 
+    fontWeight: 'bold',
+    color: '#000', 
+  },
+  sectionLink: {
+    fontSize: 24,
+    color: '#000',
+    fontWeight: '500',
+  },
+  articlesSection: {
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  articlesScroll: {
+    paddingHorizontal: theme.spacing.md,
+    gap: 12,
+  },
+  articleCard: {
+    width: 280,
+    height: 160,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  articleImage: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'flex-end',
+  },
+  articleOverlay: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    padding: 12,
+  },
+  articleTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  articleSubtitle: {
+    color: '#ddd',
+    fontSize: 12,
   },
   empty: { textAlign: 'center', color: theme.colors.textLight, marginTop: 40, fontSize: theme.fontSize.md },
 });
