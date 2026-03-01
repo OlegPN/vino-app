@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, FlatList, StyleSheet, ActivityIndicator,
-  TextInput, TouchableOpacity, SafeAreaView, ScrollView, ImageBackground
+  TextInput, TouchableOpacity, SafeAreaView, ScrollView, ImageBackground, Image
 } from 'react-native';
 import { theme } from '../theme';
 import { WineCard } from '../components/WineCard';
@@ -57,16 +57,13 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const isFiltering = !!(query || selectedType);
   const displayWines = isFiltering ? searchResults : trending;
-  const title = isFiltering
-    ? `Результаты (${searchResults.length})`
-    : 'Популярное 🔥';
 
   const renderHeader = () => (
     <>
       <View style={styles.searchRow}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Поиск вин, производителей..."
+          placeholder="Поиск вин..."
           placeholderTextColor={theme.colors.textLight}
           value={query}
           onChangeText={handleQueryChange}
@@ -93,6 +90,28 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           ))}
         </ScrollView>
       </View>
+
+      {!isFiltering && (
+        <View style={styles.horizontalSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Популярное 🔥</Text>
+            <TouchableOpacity onPress={() => {}}>
+               <Text style={styles.sectionLink}>›</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScrollList}>
+            {trending.map(wine => (
+              <View style={{ marginRight: 12 }} key={wine.id}>
+                 <WineCard 
+                   wine={wine} 
+                   horizontal={true}
+                   onPress={() => navigation.navigate('WineDetail', { wineId: wine.id })} 
+                 />
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       {!isFiltering && (
         <View style={styles.articlesSection}>
@@ -125,10 +144,12 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           </ScrollView>
         </View>
       )}
-
-      <Text style={[styles.sectionTitle, { marginLeft: theme.spacing.md, marginVertical: theme.spacing.md }]}>
-        {title}
-      </Text>
+      
+      {isFiltering && (
+        <Text style={[styles.sectionTitle, { marginLeft: theme.spacing.md, marginVertical: theme.spacing.md }]}>
+          Результаты ({searchResults.length})
+        </Text>
+      )}
     </>
   );
 
@@ -141,13 +162,14 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
       ) : (
         <FlatList
-          data={displayWines}
+          data={isFiltering ? searchResults : []}
           keyExtractor={item => item.id}
           ListHeaderComponent={renderHeader}
           renderItem={({ item }) => (
+            // In search results, display as traditional vertical list
             <WineCard wine={item} onPress={() => navigation.navigate('WineDetail', { wineId: item.id })} />
           )}
-          ListEmptyComponent={<Text style={styles.empty}>Вина не найдены</Text>}
+          ListEmptyComponent={isFiltering ? <Text style={styles.empty}>Вина не найдены</Text> : null}
           contentContainerStyle={{ paddingBottom: 24 }}
         />
       )}
@@ -180,6 +202,13 @@ const styles = StyleSheet.create({
   filterChipActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
   filterChipText: { fontSize: theme.fontSize.sm, color: theme.colors.text },
   filterChipTextActive: { color: theme.colors.white, fontWeight: theme.fontWeight.semibold },
+  horizontalSection: {
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  horizontalScrollList: {
+    paddingHorizontal: theme.spacing.md,
+  },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -198,8 +227,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   articlesSection: {
-    marginTop: 8,
-    marginBottom: 16,
+    marginBottom: 24,
   },
   articlesScroll: {
     paddingHorizontal: theme.spacing.md,
