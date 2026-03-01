@@ -5,7 +5,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Text } from 'react-native';
 import { theme } from '../theme';
 import { HomeScreen } from '../screens/HomeScreen';
-import { ScannerScreen } from '../screens/ScannerScreen';
 import { CollectionScreen } from '../screens/CollectionScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { WineDetailScreen } from '../screens/WineDetailScreen';
@@ -47,15 +46,6 @@ function HomeTabs() {
           title: 'Журнал',
           tabBarIcon: ({ focused }) => <TabIcon icon="📖" focused={focused} />,
           tabBarLabel: 'Журнал',
-        }}
-      />
-      <Tab.Screen
-        name="Scanner"
-        component={ScannerScreen}
-        options={{
-          title: 'Сканер',
-          tabBarIcon: ({ focused }) => <TabIcon icon="📷" focused={focused} />,
-          tabBarLabel: 'Сканер',
         }}
       />
       <Tab.Screen
