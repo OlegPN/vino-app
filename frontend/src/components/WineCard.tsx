@@ -16,8 +16,6 @@ interface Props {
   horizontal?: boolean; // New prop for horizontal card style
 }
 
-const { width } = Dimensions.get('window');
-
 export const WineCard: React.FC<Props> = ({ wine, onPress, compact, horizontal }) => {
   const stars = '★'.repeat(Math.round(wine.avgRating)) + '☆'.repeat(5 - Math.round(wine.avgRating));
 
@@ -37,7 +35,9 @@ export const WineCard: React.FC<Props> = ({ wine, onPress, compact, horizontal }
           />
         </View>
         <View style={styles.horizontalInfo}>
-          {wine.winery && <Text style={styles.wineryH} numberOfLines={1}>{wine.winery.name}</Text>}
+          <Text style={styles.wineryH} numberOfLines={1}>
+            {wine.winery ? wine.winery.name : 'Unknown Winery'}
+          </Text>
           <Text style={styles.nameH} numberOfLines={2}>{wine.name}</Text>
           
           <View style={styles.ratingRowH}>
@@ -104,44 +104,51 @@ const styles = StyleSheet.create({
   // Horizontal styling for the new Tailwind-like UI
   horizontalCard: {
     width: 140,
+    height: 280, // strict fixed height so they all align perfectly
     backgroundColor: '#fff',
     borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 }, elevation: 2,
     borderWidth: 1, borderColor: '#f0f0f0',
+    display: 'flex',
+    flexDirection: 'column',
   },
   horizontalImageContainer: {
     backgroundColor: '#f8f4f2',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
+    height: 150, // strict height for image area
+    width: '100%',
   },
   horizontalImage: {
-    width: 60,
-    height: 180,
+    width: '100%',
+    height: '100%',
   },
   horizontalInfo: {
     padding: 12,
+    flex: 1,
+    justifyContent: 'space-between', // push price to bottom if text is short
   },
   wineryH: {
     fontSize: 12,
     color: '#888',
     marginBottom: 4,
+    height: 16, // fixed height to prevent pushing down
   },
   nameH: {
     fontSize: 14,
     fontWeight: '700',
     color: '#1a1a1a',
     lineHeight: 18,
-    height: 38, // Fix height for 2 lines
-    marginBottom: 6,
+    height: 36, // strict height for 2 lines
+    marginBottom: 4,
   },
   ratingRowH: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   starsH: {
      color: '#E8A838',
@@ -156,5 +163,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#1a1a1a',
+    marginTop: 'auto',
   }
 });
